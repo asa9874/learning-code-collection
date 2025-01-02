@@ -34,3 +34,9 @@ async def getHumanById(human_id: HumanId):
         return {"human_id": human_id, "message": "You are"}
     else:
         return {"human_id": human_id, "message": "We are"}
+
+
+#경로 매개변수와 쿼리 매개변수
+@app.get("/test")
+async def test(id: int,name: str=None):
+    return {"name": name, "id": id}
