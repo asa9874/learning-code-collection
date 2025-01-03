@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,Query
 from enum import Enum
 from pydantic import BaseModel
+from typing import Union
 
 #FastAPI 인스턴스 생성 
 app = FastAPI()
@@ -12,21 +13,23 @@ async def root():#엔드포인트
 
 
 
-#경로 매개변수
+#0. 경로 매개변수
+##경로 매개변수는 경로의 일부로 전달되는 매개변수
 @app.get("/items/{item_id}")# /items/1 -> item_id = 1
 async def getItemById(item_id: int): #경로 매개변수 item_id
     return {"item_Id": item_id}
 
 
 
-#열거형 클래스
+#1. 사전 정의된 값으로 경로 매개변수 사용
+## 열거형 클래스
 class HumanId(int, Enum): #열거형 클래스
     me=1
     you=2
     we=3
 
 
-#사전 정의된 값으로 경로 매개변수 사용
+## 열거형 클래스를 사용하여 사전 정의된 값으로 경로 매개변수 사용
 @app.get("/humans/{human_id}")
 async def getHumanById(human_id: HumanId):
     if human_id == HumanId.me:
@@ -37,21 +40,43 @@ async def getHumanById(human_id: HumanId):
         return {"human_id": human_id, "message": "We are"}
 
 
-#경로 매개변수와 쿼리 매개변수
+
+#2. 경로 매개변수와 쿼리 매개변수
+## 경로 매개변수와 쿼리 매개변수를 동시에 사용
 @app.get("/test")
 async def test(id: int,name: str=None):
     return {"name": name, "id": id}
 
 
 
-# 데이터 모델 정의
+
+#3. 쿼리 매개변수
+## 데이터 모델 정의
 class Book(BaseModel):
     title: str
     author: str
     price: float
     is_available: bool = True  # 기본값 설정
 
-# POST 요청 처리
+## POST 요청 처리
 @app.post("/books/")
 async def create_book(book: Book):
     return {"message": "Book created successfully", "book": book}
+
+
+
+
+
+#4. 쿼리 매개변수 검증 Query
+## Query 클래스를 사용하여 쿼리 매개변수 유효성 검사
+@app.get("/items2/")
+async def get_item2(name: str, price: float, limit: int = Query(..., ge=1, le=10)):
+    return {"name": name, "price": price, "limit": limit}
+
+## 여러 쿼리 매개변수 유효성 검사
+@app.get("/items3/")
+async def get_item3(q: Union[str, None] = Query(...), limit: int = Query(..., ge=1, le=10)):
+    return {"search_query": q, "limit": limit,"search_Id": q}
+
+
+
