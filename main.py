@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from enum import Enum
+from pydantic import BaseModel
 
 #FastAPI 인스턴스 생성 
 app = FastAPI()
@@ -40,3 +41,17 @@ async def getHumanById(human_id: HumanId):
 @app.get("/test")
 async def test(id: int,name: str=None):
     return {"name": name, "id": id}
+
+
+
+# 데이터 모델 정의
+class Book(BaseModel):
+    title: str
+    author: str
+    price: float
+    is_available: bool = True  # 기본값 설정
+
+# POST 요청 처리
+@app.post("/books/")
+async def create_book(book: Book):
+    return {"message": "Book created successfully", "book": book}
