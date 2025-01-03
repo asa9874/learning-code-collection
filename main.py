@@ -1,9 +1,8 @@
-from fastapi import FastAPI,Query
 from enum import Enum
-from pydantic import BaseModel
-from typing import Union
-
-#FastAPI 인스턴스 생성 
+from typing import Annotated, Literal,Union
+from fastapi import FastAPI, Query, Path
+from pydantic import BaseModel, Field
+ #FastAPI 인스턴스 생성 
 app = FastAPI()
 
 #경로 작동 데코레이터
@@ -80,3 +79,23 @@ async def get_item3(q: Union[str, None] = Query(...), limit: int = Query(..., ge
 
 
 
+#5. 경로 매개변수 유효성 검사
+@app.get("/items4/{item_id}")
+async def get_item4(
+    item_id: int = Path(..., ge=1, le=100)
+):
+    return {"item_id": item_id}
+
+
+
+
+#6. Field
+class PaginationParams(BaseModel):
+    page: int = Field(1, ge=1)
+    size: int = Field(10, gt=0, le=100)
+    sort_by: Literal["name", "date", "price"] = "date"
+    filter: str = Field("", max_length=50)
+
+@app.get("/products/")
+async def read_products(pagination: Annotated[PaginationParams, Query()]):
+    return pagination
