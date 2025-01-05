@@ -1,7 +1,9 @@
 from enum import Enum
 from typing import Annotated, Literal,Union
-from fastapi import FastAPI, Query, Path
+from fastapi import FastAPI, Query, Path, Cookie, Response
 from pydantic import BaseModel, Field
+import uvicorn
+
  #FastAPI 인스턴스 생성 
 app = FastAPI()
 
@@ -99,3 +101,20 @@ class PaginationParams(BaseModel):
 @app.get("/products/")
 async def read_products(pagination: Annotated[PaginationParams, Query()]):
     return pagination
+
+
+# 7. 쿠키
+@app.get("/setcookie")
+def set_cookie(response: Response):
+    response.set_cookie(key="my_cookie", value="cookie_value", httponly=True, max_age=3600)
+    return {"message": "쿠키가 설정되었습니다!"}
+
+
+# 직접 실행 가능하도록 설정
+if __name__ == "__main__":
+    uvicorn.run(
+        "main:app",  # "파일이름:FastAPI 객체 이름"
+        host="127.0.0.1",  # 또는 "0.0.0.0" (외부에서 접근 가능)
+        port=8000,  # 원하는 포트 번호
+        reload=True  # 개발 모드에서 코드 변경 시 자동 재시작
+    )
