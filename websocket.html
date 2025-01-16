@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat</title>
+    <style>
+        #chatLog div{
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <form id="messageForm">
+        <input type="text" id="messageInput" placeholder="메시지입력">
+        <button type="submit">Send</button>
+    </form>
+    <div id="chatLog"></div>
+</body>
+
+<script>
+    const clientId = "익명"+Date.now();
+    const socket = new WebSocket(`ws://localhost:8000/ws/${clientId}`);
+
+    // HTML 요소 가져오기
+    const form = document.getElementById("messageForm");
+    const messageInput = document.getElementById("messageInput");
+    const chatLog = document.getElementById("chatLog");
+
+    // WebSocket 연결 이벤트
+    socket.onopen = () => {
+        appendMessage("서버 접속완료");
+    };
+
+    // 서버에서 메시지를 받을 때
+    socket.onmessage = (event) => {
+        appendMessage(event.data);
+    };
+
+    // WebSocket 연결 종료 이벤트
+    socket.onclose = () => {
+        appendMessage("서버가 연결안됨 ㅋ");
+    };
+
+    // 폼 제출 이벤트 처리
+    form.addEventListener("submit", (e) => {
+        e.preventDefault(); // 폼 기본 동작 막기
+        const message = messageInput.value.trim();
+
+        if (message) {
+            socket.send(message); // WebSocket으로 메시지 전송
+            messageInput.value = ""; // 입력창 비우기
+        }
+    });
+
+    // 메시지를 채팅 로그에 추가
+    function appendMessage(message) {
+        const messageElement = document.createElement("div");
+        messageElement.textContent = message;
+        chatLog.appendChild(messageElement);
+    }
+</script>
+</html>
